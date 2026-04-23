@@ -1,0 +1,68 @@
+# ------------------------------
+# OS / Editor
+# ------------------------------
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# ------------------------------
+# Python (backend)
+# ------------------------------
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+.eggs/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Virtual environments
+venv/
+.venv/
+backend/venv/
+backend/.venv/
+
+# Python env files
+.env
+.env.*
+backend/.env
+backend/.env.*
+
+# ------------------------------
+# Node / React (frontend)
+# ------------------------------
+frontend/node_modules/
+frontend/build/
+frontend/dist/
+frontend/.cache/
+frontend/.eslintcache
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/pnpm-debug.log*
+
+# Frontend env files
+frontend/.env
+frontend/.env.*
+
+# ------------------------------
+# App runtime uploads / generated files
+# ------------------------------
+uploads/*
+backend/uploads/*
+!uploads/.gitkeep
+!backend/uploads/.gitkeep
+
+# SQLite / local DB files (if used)
+*.db
+*.sqlite3
+
+# Logs
+*.log
