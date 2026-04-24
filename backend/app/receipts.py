@@ -72,12 +72,61 @@ def _parse_date(text: str) -> date:
     return date.today()
 
 
+def _parse_items(text: str) -> list[Dict[str, Any]]:
+    """Extract line items from receipt text.
+    
+    Looks for patterns like:
+    - Item Name    5.99
+    - Description  x2  10.99
+    - Product      qty: 3  price: 15.50
+    """
+    items = []
+    lines = text.strip().split("\n")
+    
+    for line in lines:
+        line = line.strip()
+        if not line or len(line) < 3:
+            continue
+            
+        # Skip common non-item lines
+        if any(skip in line.lower() for skip in ["total", "subtotal", "tax", "paid", "thank", "receipt", "date", "time"]):
+            continue
+        
+        # Pattern 1: "Item Name  $12.99" or "Item Name  12.99  x2"
+        # Look for price patterns at end of line
+        price_match = re.search(r'(?:^|[\s]+)(\d{1,6}[.,]\d{2})(?:\s*$|\s+(?:x|qty|qty:)?[\s]*(\d+(?:[.,]\d+)?)?)', line)
+        
+        if price_match:
+            price_str = price_match.group(1).replace(",", ".")
+            qty_str = price_match.group(2)
+            quantity = 1.0
+            
+            try:
+                price = float(price_str)
+                if qty_str:
+                    quantity = float(qty_str.replace(",", "."))
+                
+                # Extract item name (everything before the price)
+                item_name = line[:price_match.start()].strip()
+                if item_name and len(item_name) > 1:
+                    items.append({
+                        "name": item_name[:255],
+                        "price": price,
+                        "quantity": quantity,
+                    })
+            except ValueError:
+                continue
+    
+    return items
+
+
 async def process_receipt(file_path: str) -> Dict[str, Any]:
     result: Dict[str, Any] = {
         "amount": None,
         "vendor_name": None,
         "cost_date": date.today().isoformat(),
         "raw_text": "",
+        "items": [],
         "success": False,
     }
 
@@ -108,6 +157,7 @@ async def process_receipt(file_path: str) -> Dict[str, Any]:
             result["amount"] = _parse_amount(full_text)
             result["vendor_name"] = _parse_vendor(full_text)
             result["cost_date"] = _parse_date(full_text).isoformat()
+            result["items"] = _parse_items(full_text)
             result["success"] = True
 
     except ImportError:
@@ -177,6 +227,20 @@ async def upload_receipt(
             )
             cost_id = cost_row["Cost_ID"]
             cost_created = True
+            
+            # Insert line items from receipt
+            if extracted_data.get("items"):
+                for item in extracted_data["items"]:
+                    await db.execute(
+                        '''
+                        INSERT INTO "Item" ("Cost_ID", "Name", "Price", "Quantity")
+                        VALUES ($1, $2, $3, $4)
+                        ''',
+                        cost_id,
+                        item.get("name"),
+                        item.get("price"),
+                        item.get("quantity"),
+                    )
 
     return ReceiptUploadResponse(
         receipt=ReceiptResponse.model_validate(dict(receipt_row)),

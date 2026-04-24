@@ -2,34 +2,146 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap");
+
 @layer base {
+  :root {
+    --ink: #1f2430;
+    --muted: #5c6679;
+    --surface: #fbfaf5;
+    --surface-elevated: #fffef9;
+    --line: #d9d4c5;
+    --brand: #1d5c63;
+    --brand-strong: #124147;
+    --accent: #c56a3d;
+    --ok: #2f7d50;
+    --warn: #b0671f;
+    --danger: #b3473f;
+  }
+
+  * {
+    @apply antialiased;
+  }
+
   body {
-    @apply bg-gray-50 text-gray-900;
+    font-family: "Source Sans 3", sans-serif;
+    color: var(--ink);
+    background:
+      radial-gradient(circle at 12% 18%, rgba(197, 106, 61, 0.16), transparent 42%),
+      radial-gradient(circle at 88% 10%, rgba(29, 92, 99, 0.2), transparent 38%),
+      linear-gradient(170deg, #f3efe3 0%, #f8f5eb 45%, #f3efe3 100%);
+    min-height: 100vh;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: "Space Grotesk", sans-serif;
+    letter-spacing: -0.01em;
+  }
+
+  ::selection {
+    background: rgba(29, 92, 99, 0.2);
+    color: #0f2b2e;
+  }
+
+  #root {
+    min-height: 100vh;
   }
 }
 
 @layer components {
+  .panel {
+    @apply rounded-2xl border p-5 shadow-sm;
+    border-color: var(--line);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.88) 0%, rgba(255, 254, 249, 0.95) 100%);
+    box-shadow: 0 8px 24px rgba(35, 33, 28, 0.08);
+  }
+
+  .panel-strong {
+    @apply rounded-2xl border p-6;
+    border-color: #cfc8b2;
+    background: linear-gradient(180deg, #fffdf6 0%, #faf6e7 100%);
+    box-shadow: 0 14px 35px rgba(44, 40, 29, 0.14);
+  }
+
   .btn-primary {
-    @apply bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold text-white transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50;
+    background: linear-gradient(135deg, var(--brand) 0%, var(--brand-strong) 100%);
+    box-shadow: 0 8px 20px rgba(17, 65, 71, 0.25);
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 24px rgba(17, 65, 71, 0.33);
   }
 
   .btn-secondary {
-    @apply bg-white hover:bg-gray-50 text-gray-700 font-medium py-2 px-4 rounded-lg border border-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2;
+    @apply inline-flex items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors;
+    border: 1px solid #b9b19c;
+    color: #38352b;
+    background: rgba(255, 255, 255, 0.78);
+  }
+
+  .btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.96);
+    border-color: #9d9682;
   }
 
   .btn-danger {
-    @apply bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2;
+    @apply inline-flex items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold text-white transition-all;
+    background: linear-gradient(135deg, #ba4c43 0%, #a63a33 100%);
   }
 
   .input-field {
-    @apply block w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent;
+    @apply block w-full rounded-xl border px-3.5 py-2.5 text-sm transition-all placeholder:text-slate-400 focus:outline-none;
+    border-color: #c7c0ab;
+    background: rgba(255, 255, 255, 0.85);
+    color: #28261f;
+  }
+
+  .input-field:focus {
+    border-color: #31727a;
+    box-shadow: 0 0 0 4px rgba(49, 114, 122, 0.14);
   }
 
   .card {
-    @apply bg-white rounded-xl shadow-sm border border-gray-200 p-6;
+    @apply panel;
   }
 
   .badge {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold;
+  }
+
+  .page-title {
+    @apply text-3xl font-bold tracking-tight;
+  }
+
+  .subtle-text {
+    color: var(--muted);
+  }
+
+  .stagger-in {
+    animation: fade-rise 0.45s ease forwards;
+  }
+
+  .glass-strip {
+    background: linear-gradient(110deg, rgba(255, 255, 255, 0.68) 0%, rgba(255, 255, 255, 0.3) 100%);
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(255, 255, 255, 0.65);
+  }
+}
+
+@keyframes fade-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

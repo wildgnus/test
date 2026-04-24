@@ -10,34 +10,51 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { to: "/dashboard", label: "Dashboard", icon: "📊" },
-  { to: "/projects", label: "Projects", icon: "📁" },
-  { to: "/tasks", label: "Tasks", icon: "✅" },
-  { to: "/budget", label: "Budget", icon: "💰" },
-  { to: "/receipts/upload", label: "Upload Receipt", icon: "🧾" },
+  { to: "/dashboard", label: "Dashboard", icon: "OV" },
+  { to: "/projects", label: "Projects", icon: "PJ" },
+  { to: "/tasks", label: "Tasks", icon: "TS" },
+  { to: "/budget", label: "Budget", icon: "BG" },
+  { to: "/receipts/upload", label: "Receipts", icon: "RC" },
 ];
 
-export function Sidebar() {
+export function Sidebar({
+  isOpen,
+  onClose,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+}) {
   const { isManager } = useAuth();
 
   return (
-    <aside className="w-56 min-h-screen bg-white border-r border-gray-200 pt-6">
-      <nav className="px-3 space-y-1">
+    <aside
+      className={`fixed inset-y-0 left-0 z-40 mt-16 w-72 transform border-r border-[#cec4a7] bg-[#f7f1de] px-3 py-5 shadow-2xl transition-transform duration-300 lg:static lg:mt-0 lg:min-h-[calc(100vh-4rem)] lg:w-64 lg:translate-x-0 lg:shadow-none ${
+        isOpen ? "translate-x-0" : "-translate-x-full"
+      }`}
+    >
+      <div className="mb-4 rounded-xl border border-[#d2c6aa] bg-white/60 px-3 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-[#5f563f]">
+        Workspace
+      </div>
+
+      <nav className="space-y-1.5">
         {navItems
           .filter((item) => !item.managerOnly || isManager)
           .map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
+              onClick={onClose}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                `flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-all ${
                   isActive
-                    ? "bg-primary-50 text-primary-700"
-                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                    ? "bg-[#1d5c63] text-white shadow-md"
+                    : "text-[#544d38] hover:bg-white/70 hover:text-[#2f2a1d]"
                 }`
               }
             >
-              <span>{item.icon}</span>
+              <span className="grid h-7 w-7 place-content-center rounded-lg border border-current/20 text-[10px] tracking-[0.08em]">
+                {item.icon}
+              </span>
               {item.label}
             </NavLink>
           ))}

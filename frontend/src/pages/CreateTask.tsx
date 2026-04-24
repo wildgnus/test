@@ -55,18 +55,21 @@ export function CreateTask() {
   };
 
   return (
-    <div className="max-w-xl">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">New Task</h1>
+    <div className="mx-auto max-w-3xl space-y-6">
+      <div className="panel-strong">
+        <h1 className="page-title text-[#1f272a]">Create Task</h1>
+        <p className="mt-1 text-[#67624f]">Give each task a clear owner, priority, and finish date.</p>
+      </div>
 
       {error && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+        <div className="rounded-xl border border-[#d58d7f] bg-[#fff3ef] p-3 text-sm text-[#8d2e1f]">
           {error}
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="card space-y-4">
+      <form onSubmit={handleSubmit} className="panel space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="mb-1 block text-sm font-semibold text-[#4f4836]">
             Project *
           </label>
           <select
@@ -75,7 +78,7 @@ export function CreateTask() {
             value={form.project_id}
             onChange={(e) => setForm((f) => ({ ...f, project_id: e.target.value }))}
           >
-            <option value="">Select a project…</option>
+            <option value="">Select a project...</option>
             {projects.map((p) => (
               <option key={p.Project_ID} value={p.Project_ID}>
                 {p.Name}
@@ -85,7 +88,7 @@ export function CreateTask() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="mb-1 block text-sm font-semibold text-[#4f4836]">
             Task Title *
           </label>
           <input
@@ -98,7 +101,7 @@ export function CreateTask() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="mb-1 block text-sm font-semibold text-[#4f4836]">
             Description
           </label>
           <textarea
@@ -109,9 +112,9 @@ export function CreateTask() {
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="mb-1 block text-sm font-semibold text-[#4f4836]">
               Priority
             </label>
             <select
@@ -125,7 +128,7 @@ export function CreateTask() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="mb-1 block text-sm font-semibold text-[#4f4836]">
               Deadline
             </label>
             <input
@@ -138,7 +141,7 @@ export function CreateTask() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="mb-1 block text-sm font-semibold text-[#4f4836]">
             Assign to
           </label>
           <select
@@ -155,9 +158,9 @@ export function CreateTask() {
           </select>
         </div>
 
-        <div className="flex gap-3 pt-2">
+        <div className="flex flex-wrap gap-3 pt-2">
           <button type="submit" disabled={loading} className="btn-primary">
-            {loading ? "Creating…" : "Create Task"}
+            {loading ? "Creating..." : "Create Task"}
           </button>
           <button
             type="button"
