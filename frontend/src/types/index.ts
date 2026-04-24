@@ -30,6 +30,15 @@ export interface Task {
   Created_at: string;
 }
 
+export interface Item {
+  Item_ID: string;
+  Cost_ID: string;
+  Name?: string;
+  Price?: number;
+  Quantity?: number;
+  Created_at: string;
+}
+
 export interface Cost {
   Cost_ID: string;
   Project_ID: string;
@@ -39,6 +48,7 @@ export interface Cost {
   Cost_date: string;
   Category: "materials" | "labor" | "equipment" | "other";
   Created_at: string;
+  Items?: Item[];
 }
 
 export interface Receipt {
@@ -55,6 +65,7 @@ export interface ReceiptUploadResult {
     vendor_name: string | null;
     cost_date: string;
     raw_text: string;
+    items: Array<{ name?: string; price?: number; quantity?: number }>;
     success: boolean;
   };
   cost_created: boolean;

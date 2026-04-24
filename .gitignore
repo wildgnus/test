@@ -34,6 +34,8 @@ backend/.venv/
 .env.*
 backend/.env
 backend/.env.*
+backend/*-*.json
+backend/service-account.json
 
 # ------------------------------
 # Node / React (frontend)

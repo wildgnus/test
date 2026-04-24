@@ -4,9 +4,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from app.core.config import settings
-from app.core.database import create_pool, close_pool
-from app.routers import auth, costs, projects, receipts, tasks, users
+from app import auth, costs, projects, receipts, tasks, users
+from app.common import close_pool, create_pool, settings
 
 app = FastAPI(
     title="Construction Management Platform",

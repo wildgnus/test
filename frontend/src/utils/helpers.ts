@@ -25,28 +25,28 @@ export function budgetStatus(
 
 export function statusBadgeClass(status: string): string {
   const map: Record<string, string> = {
-    pending: "bg-yellow-100 text-yellow-800",
-    in_progress: "bg-blue-100 text-blue-800",
-    completed: "bg-green-100 text-green-800",
+    pending: "bg-[#f7e8cc] text-[#875217]",
+    in_progress: "bg-[#d7ecef] text-[#1d5c63]",
+    completed: "bg-[#d7eedf] text-[#276940]",
   };
-  return map[status] ?? "bg-gray-100 text-gray-800";
+  return map[status] ?? "bg-[#ece8dc] text-[#5e5746]";
 }
 
 export function priorityBadgeClass(priority: string): string {
   const map: Record<string, string> = {
-    low: "bg-gray-100 text-gray-600",
-    medium: "bg-orange-100 text-orange-700",
-    high: "bg-red-100 text-red-700",
+    low: "bg-[#e9e4d7] text-[#5c5340]",
+    medium: "bg-[#f3dfc8] text-[#9a5621]",
+    high: "bg-[#f5d6cd] text-[#a53f34]",
   };
-  return map[priority] ?? "bg-gray-100 text-gray-600";
+  return map[priority] ?? "bg-[#ece8dc] text-[#5e5746]";
 }
 
 export function categoryBadgeClass(category: string): string {
   const map: Record<string, string> = {
-    materials: "bg-blue-100 text-blue-700",
-    labor: "bg-purple-100 text-purple-700",
-    equipment: "bg-yellow-100 text-yellow-700",
-    other: "bg-gray-100 text-gray-600",
+    materials: "bg-[#d8eaed] text-[#1f626a]",
+    labor: "bg-[#dbe7dd] text-[#2b6f46]",
+    equipment: "bg-[#f2e0c3] text-[#9a5621]",
+    other: "bg-[#ece8dc] text-[#5e5746]",
   };
-  return map[category] ?? "bg-gray-100 text-gray-600";
+  return map[category] ?? "bg-[#ece8dc] text-[#5e5746]";
 }

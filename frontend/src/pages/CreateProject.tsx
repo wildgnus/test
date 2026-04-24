@@ -58,20 +58,23 @@ export function CreateProject() {
   };
 
   return (
-    <div className="max-w-xl">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">
-        {isEdit ? "Edit Project" : "New Project"}
-      </h1>
+    <div className="mx-auto max-w-3xl space-y-6">
+      <div className="panel-strong">
+        <h1 className="page-title text-[#1f272a]">{isEdit ? "Edit Project" : "Create Project"}</h1>
+        <p className="mt-1 text-[#67624f]">
+          Define budget, scope, and deadline clearly before execution starts.
+        </p>
+      </div>
 
       {error && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+        <div className="rounded-xl border border-[#d58d7f] bg-[#fff3ef] p-3 text-sm text-[#8d2e1f]">
           {error}
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="card space-y-4">
+      <form onSubmit={handleSubmit} className="panel space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="mb-1 block text-sm font-semibold text-[#4f4836]">
             Project Name *
           </label>
           <input
@@ -84,13 +87,13 @@ export function CreateProject() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="mb-1 block text-sm font-semibold text-[#4f4836]">
             Description
           </label>
           <textarea
             rows={3}
             className="input-field resize-none"
-            placeholder="Brief description of the project…"
+            placeholder="Brief description of the project..."
             value={form.description}
             onChange={(e) =>
               setForm((f) => ({ ...f, description: e.target.value }))
@@ -98,9 +101,9 @@ export function CreateProject() {
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="mb-1 block text-sm font-semibold text-[#4f4836]">
               Budget (USD) *
             </label>
             <input
@@ -116,7 +119,7 @@ export function CreateProject() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="mb-1 block text-sm font-semibold text-[#4f4836]">
               Deadline *
             </label>
             <input
@@ -131,9 +134,9 @@ export function CreateProject() {
           </div>
         </div>
 
-        <div className="flex gap-3 pt-2">
+        <div className="flex flex-wrap gap-3 pt-2">
           <button type="submit" disabled={loading} className="btn-primary">
-            {loading ? "Saving…" : isEdit ? "Update Project" : "Create Project"}
+            {loading ? "Saving..." : isEdit ? "Update Project" : "Create Project"}
           </button>
           <button
             type="button"

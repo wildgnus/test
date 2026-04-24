@@ -58,8 +58,8 @@ export function ProjectDetails() {
     }
   };
 
-  if (loading) return <div className="flex items-center justify-center h-64 text-gray-500">Loading…</div>;
-  if (!project) return <div className="text-red-600 p-4">Project not found.</div>;
+  if (loading) return <div className="flex h-64 items-center justify-center subtle-text">Loading...</div>;
+  if (!project) return <div className="rounded-xl border border-[#d58d7f] bg-[#fff3ef] p-4 text-[#8d2e1f]">Project not found.</div>;
 
   const unassignedUsers = allUsers.filter(
     (u) => !members.find((m) => m.User_ID === u.User_ID)
@@ -67,12 +67,11 @@ export function ProjectDetails() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-start justify-between">
+      <div className="panel-strong flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">{project.Name}</h1>
+          <h1 className="page-title text-[#1f272a]">{project.Name}</h1>
           {project.Description && (
-            <p className="text-gray-500 mt-1">{project.Description}</p>
+            <p className="mt-1 text-[#67624f]">{project.Description}</p>
           )}
         </div>
         {isManager && (
@@ -82,74 +81,72 @@ export function ProjectDetails() {
         )}
       </div>
 
-      {/* Budget summary */}
-      <div className="card">
-        <div className="flex justify-between items-center mb-3">
-          <h2 className="font-semibold text-gray-800">Budget</h2>
-          <Link to="/budget" className="text-sm text-primary-600 hover:underline">
-            Full overview →
+      <div className="panel">
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <h2 className="text-lg font-semibold text-[#2b2a22]">Budget</h2>
+          <Link to="/budget" className="text-sm font-semibold text-[#1d5c63] hover:text-[#124147]">
+            Full overview
           </Link>
         </div>
-        <div className="grid grid-cols-3 gap-4 mb-4">
+        <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
           <div>
-            <p className="text-xs text-gray-500">Budget</p>
-            <p className="text-lg font-bold text-gray-900">
+            <p className="text-xs uppercase tracking-[0.08em] text-[#786f59]">Budget</p>
+            <p className="text-lg font-bold text-[#2a2a23]">
               {formatCurrency(Number(project.Budget))}
             </p>
           </div>
           <div>
-            <p className="text-xs text-gray-500">Spent</p>
-            <p className="text-lg font-bold text-orange-600">
+            <p className="text-xs uppercase tracking-[0.08em] text-[#786f59]">Spent</p>
+            <p className="text-lg font-bold text-[#b0671f]">
               {formatCurrency(totalSpent)}
             </p>
           </div>
           <div>
-            <p className="text-xs text-gray-500">Remaining</p>
-            <p className={`text-lg font-bold ${Number(project.Budget) - totalSpent < 0 ? "text-red-600" : "text-green-600"}`}>
+            <p className="text-xs uppercase tracking-[0.08em] text-[#786f59]">Remaining</p>
+            <p className={`text-lg font-bold ${Number(project.Budget) - totalSpent < 0 ? "text-[#b3473f]" : "text-[#2f7d50]"}`}>
               {formatCurrency(Number(project.Budget) - totalSpent)}
             </p>
           </div>
         </div>
-        <div className="w-full bg-gray-200 rounded-full h-2.5">
+        <div className="h-2.5 w-full rounded-full bg-[#ddd4bb]">
           <div
             className={`h-2.5 rounded-full ${
-              budgetPct >= 100 ? "bg-red-500" : budgetPct >= 80 ? "bg-yellow-500" : "bg-green-500"
+              budgetPct >= 100 ? "bg-[#b3473f]" : budgetPct >= 80 ? "bg-[#b0671f]" : "bg-[#2f7d50]"
             }`}
             style={{ width: `${Math.min(budgetPct, 100)}%` }}
           />
         </div>
         {budgetPct >= 100 && (
-          <p className="text-sm text-red-600 font-medium mt-2">
-            ⚠️ Budget exceeded by {formatCurrency(totalSpent - Number(project.Budget))}
+          <p className="mt-2 text-sm font-semibold text-[#b3473f]">
+            Budget exceeded by {formatCurrency(totalSpent - Number(project.Budget))}
           </p>
         )}
       </div>
 
-      {/* Tasks */}
-      <div className="card">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="font-semibold text-gray-800">Tasks ({tasks.length})</h2>
+      <div className="panel">
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <h2 className="text-lg font-semibold text-[#2b2a22]">Tasks ({tasks.length})</h2>
           {isManager && (
             <Link to={`/tasks/create?project=${id}`} className="btn-primary text-sm">
-              + Add Task
+              Add Task
             </Link>
           )}
         </div>
         {tasks.length === 0 ? (
-          <p className="text-gray-400 text-sm">No tasks for this project.</p>
+          <p className="text-sm text-[#726b56]">No tasks for this project.</p>
         ) : (
-          <ul className="divide-y divide-gray-100">
+          <ul className="divide-y divide-[#e2d9c0]">
             {tasks.map((t) => (
               <li key={t.Task_ID} className="py-3">
                 <Link
                   to={`/tasks/${t.Task_ID}`}
-                  className="flex items-center justify-between hover:bg-gray-50 rounded-lg px-2 -mx-2 py-1 transition-colors"
+                  className="-mx-2 flex items-center justify-between rounded-xl px-2 py-2 transition-colors hover:bg-white/75"
                 >
                   <div className="flex items-center gap-3">
                     <span className={`badge ${priorityBadgeClass(t.Priority)}`}>
                       {t.Priority}
                     </span>
-                    <span className="text-sm font-medium text-gray-800">{t.Title}</span>
+                    <span className="text-sm font-semibold text-[#2a2a23]">{t.Title}</span>
                   </div>
                   <span className={`badge ${statusBadgeClass(t.Status)}`}>
                     {t.Status.replace("_", " ")}
@@ -161,31 +158,30 @@ export function ProjectDetails() {
         )}
       </div>
 
-      {/* Costs */}
-      <div className="card">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="font-semibold text-gray-800">Costs ({costs.length})</h2>
+      <div className="panel">
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <h2 className="text-lg font-semibold text-[#2b2a22]">Costs ({costs.length})</h2>
           <Link to="/receipts/upload" className="btn-secondary text-sm">
             Upload Receipt
           </Link>
         </div>
         {costs.length === 0 ? (
-          <p className="text-gray-400 text-sm">No costs recorded.</p>
+          <p className="text-sm text-[#726b56]">No costs recorded.</p>
         ) : (
-          <ul className="divide-y divide-gray-100">
+          <ul className="divide-y divide-[#e2d9c0]">
             {costs.map((c) => (
               <li key={c.Cost_ID} className="py-3 flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-800">
+                  <p className="text-sm font-semibold text-[#2a2a23]">
                     {c.Vendor_name ?? "Unknown vendor"}
                   </p>
-                  <p className="text-xs text-gray-400">{formatDate(c.Cost_date)}</p>
+                  <p className="text-xs text-[#786f59]">{formatDate(c.Cost_date)}</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <span className={`badge ${categoryBadgeClass(c.Category)}`}>
                     {c.Category}
                   </span>
-                  <span className="font-semibold text-gray-900">
+                  <span className="font-bold text-[#2a2a23]">
                     {formatCurrency(Number(c.Amount))}
                   </span>
                 </div>
@@ -195,22 +191,21 @@ export function ProjectDetails() {
         )}
       </div>
 
-      {/* Team */}
       {isManager && (
-        <div className="card">
-          <h2 className="font-semibold text-gray-800 mb-4">Team Members</h2>
+        <div className="panel">
+          <h2 className="mb-4 text-lg font-semibold text-[#2b2a22]">Team Members</h2>
           {members.length > 0 && (
             <ul className="mb-4 space-y-2">
               {members.map((m) => (
                 <li key={m.User_ID} className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center text-sm font-semibold">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#d7ecef] text-sm font-semibold text-[#1d5c63]">
                     {m.Name[0]}{m.Surname[0]}
                   </div>
                   <div>
-                    <p className="text-sm font-medium">{m.Name} {m.Surname}</p>
-                    <p className="text-xs text-gray-400">{m.Email}</p>
+                    <p className="text-sm font-semibold text-[#2a2a23]">{m.Name} {m.Surname}</p>
+                    <p className="text-xs text-[#786f59]">{m.Email}</p>
                   </div>
-                  <span className="badge bg-gray-100 text-gray-600 ml-auto">{m.Role}</span>
+                  <span className="badge ml-auto bg-[#ece8dc] text-[#5e5746]">{m.Role}</span>
                 </li>
               ))}
             </ul>
@@ -222,7 +217,7 @@ export function ProjectDetails() {
                 value={assignId}
                 onChange={(e) => setAssignId(e.target.value)}
               >
-                <option value="">Select user to assign…</option>
+                <option value="">Select user to assign...</option>
                 {unassignedUsers.map((u) => (
                   <option key={u.User_ID} value={u.User_ID}>
                     {u.Name} {u.Surname} ({u.Role})
@@ -234,7 +229,7 @@ export function ProjectDetails() {
                 disabled={!assignId || assigning}
                 className="btn-primary"
               >
-                {assigning ? "Assigning…" : "Assign"}
+                {assigning ? "Assigning..." : "Assign"}
               </button>
             </div>
           )}
