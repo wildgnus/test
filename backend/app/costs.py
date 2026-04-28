@@ -2,10 +2,10 @@ import uuid
 from datetime import date, datetime
 from typing import List, Literal, Optional
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 
-from app.common import UserPublic, get_current_user, get_db
+from app.common import UserPublic, get_current_user, get_db, require_manager
 
 router = APIRouter(prefix="/costs", tags=["costs"])
 
@@ -81,3 +81,14 @@ async def get_project_costs(
 ):
     rows = await db.fetch(f'SELECT {_COST_COLS} FROM "Cost" WHERE "Project_ID" = $1', project_id)
     return await _get_costs_with_items(db, rows)
+
+
+@router.delete("/{cost_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_cost(
+    cost_id: uuid.UUID,
+    db=Depends(get_db),
+    current_user: UserPublic = Depends(require_manager),
+):
+    result = await db.execute('DELETE FROM "Cost" WHERE "Cost_ID" = $1', cost_id)
+    if result == "DELETE 0":
+        raise HTTPException(status_code=404, detail="Cost not found")

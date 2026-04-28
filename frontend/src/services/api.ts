@@ -86,6 +86,7 @@ export const tasksApi = {
 export const costsApi = {
   getAll: () => api.get("/costs"),
   getByProject: (projectId: string) => api.get(`/costs/project/${projectId}`),
+  delete: (costId: string) => api.delete(`/costs/${costId}`),
 };
 
 export const receiptsApi = {

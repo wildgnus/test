@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { costsApi, projectsApi } from "../services/api";
+import { useAuth } from "../contexts/AuthContext";
 import type { Cost, Project } from "../types";
 import {
   categoryBadgeClass,
@@ -17,10 +18,12 @@ interface ProjectBudget {
 }
 
 export function BudgetOverview() {
+  const { isManager } = useAuth();
   const [data, setData] = useState<ProjectBudget[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
   const [expandedCost, setExpandedCost] = useState<string | null>(null);
+  const [deletingCostId, setDeletingCostId] = useState<string | null>(null);
 
   useEffect(() => {
     Promise.all([projectsApi.getAll(), costsApi.getAll()]).then(([pRes, cRes]) => {
@@ -58,6 +61,44 @@ export function BudgetOverview() {
         }, {})
       )
     : [];
+
+  const removeCostFromState = (costId: string) => {
+    setData((prev) =>
+      prev.map((entry) => {
+        const updatedCosts = entry.costs.filter((c) => c.Cost_ID !== costId);
+        if (updatedCosts.length === entry.costs.length) {
+          return entry;
+        }
+        const spent = updatedCosts.reduce((sum, c) => sum + Number(c.Amount), 0);
+        const budget = Number(entry.project.Budget);
+        return {
+          ...entry,
+          costs: updatedCosts,
+          spent,
+          remaining: budget - spent,
+          pct: budget > 0 ? (spent / budget) * 100 : 0,
+        };
+      })
+    );
+  };
+
+  const handleDeleteCost = async (costId: string) => {
+    if (!window.confirm("Delete this cost entry? This cannot be undone.")) {
+      return;
+    }
+    try {
+      setDeletingCostId(costId);
+      await costsApi.delete(costId);
+      if (expandedCost === costId) {
+        setExpandedCost(null);
+      }
+      removeCostFromState(costId);
+    } catch {
+      window.alert("Failed to delete cost. Please try again.");
+    } finally {
+      setDeletingCostId(null);
+    }
+  };
 
   if (loading) return <div className="flex h-64 items-center justify-center subtle-text">Loading...</div>;
 
@@ -194,6 +235,19 @@ export function BudgetOverview() {
                       <p className="font-semibold text-[#2a2a23]">
                         {formatCurrency(Number(c.Amount))}
                       </p>
+                      {isManager && (
+                        <button
+                          type="button"
+                          className="mt-2 text-xs font-semibold text-[#b3473f] hover:text-[#8e302b] disabled:opacity-50"
+                          disabled={deletingCostId === c.Cost_ID}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            void handleDeleteCost(c.Cost_ID);
+                          }}
+                        >
+                          {deletingCostId === c.Cost_ID ? "Deleting..." : "Delete"}
+                        </button>
+                      )}
                     </div>
                   </div>
 

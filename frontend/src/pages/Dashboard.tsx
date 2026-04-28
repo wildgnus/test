@@ -5,6 +5,13 @@ import { costsApi, projectsApi, tasksApi } from "../services/api";
 import type { Cost, Project, Task } from "../types";
 import { formatCurrency, formatDate, statusBadgeClass } from "../utils/helpers";
 
+interface ProjectBudgetRow {
+  project: Project;
+  spent: number;
+  remaining: number;
+  pct: number;
+}
+
 export function Dashboard() {
   const { user, isManager } = useAuth();
   const [projects, setProjects] = useState<Project[]>([]);
@@ -24,11 +31,21 @@ export function Dashboard() {
     }).finally(() => setLoading(false));
   }, []);
 
-  const totalBudget = projects.reduce((s, p) => s + Number(p.Budget), 0);
-  const totalSpent = costs.reduce((s, c) => s + Number(c.Amount), 0);
+  const projectBudgets: ProjectBudgetRow[] = projects.map((project) => {
+    const projectCosts = costs.filter((cost) => cost.Project_ID === project.Project_ID);
+    const spent = projectCosts.reduce((sum, cost) => sum + Number(cost.Amount), 0);
+    const budget = Number(project.Budget);
+
+    return {
+      project,
+      spent,
+      remaining: budget - spent,
+      pct: budget > 0 ? (spent / budget) * 100 : 0,
+    };
+  });
   const pendingTasks = tasks.filter((t) => t.Status === "pending").length;
   const inProgressTasks = tasks.filter((t) => t.Status === "in_progress").length;
-  const utilization = totalBudget > 0 ? (totalSpent / totalBudget) * 100 : 0;
+  const overBudgetProjects = projectBudgets.filter((entry) => entry.pct >= 100).length;
 
   if (loading) {
     return <div className="flex h-64 items-center justify-center subtle-text">Loading...</div>;
@@ -49,9 +66,9 @@ export function Dashboard() {
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {[
           { label: "Projects", value: projects.length, note: "Open scopes" },
-          { label: "Budget", value: formatCurrency(totalBudget), note: "Planned total" },
-          { label: "Spent", value: formatCurrency(totalSpent), note: "Recorded costs" },
+          { label: "Pending Tasks", value: pendingTasks, note: "Waiting to start" },
           { label: "In Progress", value: inProgressTasks, note: "Active tasks" },
+          { label: "Over Budget", value: overBudgetProjects, note: "Projects over plan" },
         ].map((stat, index) => (
           <article
             key={stat.label}
@@ -65,31 +82,71 @@ export function Dashboard() {
         ))}
       </div>
 
-      {totalBudget > 0 && (
-        <section className="panel">
-          <div className="mb-2 flex items-center justify-between gap-3">
-            <h2 className="text-lg font-semibold text-[#2b2a22]">Budget Utilization</h2>
-            <span className="text-sm text-[#665f4b]">
-              {formatCurrency(totalSpent)} / {formatCurrency(totalBudget)}
-            </span>
+      <section className="panel">
+        <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h2 className="text-lg font-semibold text-[#2b2a22]">Project Budgets</h2>
+            <p className="text-sm text-[#746d59]">
+              Budget and spend are tracked per project so totals do not blur separate scopes.
+            </p>
           </div>
-          <div className="h-3 w-full rounded-full bg-[#ddd4bb]">
-            <div
-              className={`h-3 rounded-full transition-all ${
-                utilization >= 100
-                  ? "bg-[#b3473f]"
-                  : utilization >= 80
-                  ? "bg-[#b0671f]"
-                  : "bg-[#2f7d50]"
-              }`}
-              style={{ width: `${Math.min(utilization, 100)}%` }}
-            />
+          <span className="text-sm text-[#665f4b]">{projectBudgets.length} projects</span>
+        </div>
+
+        {projectBudgets.length === 0 ? (
+          <p className="text-sm text-[#7b7562]">No projects yet.</p>
+        ) : (
+          <div className="space-y-4">
+            {projectBudgets.map((entry, index) => (
+              <div
+                key={entry.project.Project_ID}
+                className="rounded-xl border border-[#d9cfb6] bg-white/65 p-4"
+                style={{ animationDelay: `${index * 60}ms` }}
+              >
+                <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <Link
+                      to={`/projects/${entry.project.Project_ID}`}
+                      className="text-base font-semibold text-[#2a2a23] hover:text-[#1d5c63]"
+                    >
+                      {entry.project.Name}
+                    </Link>
+                    <p className="text-xs text-[#7a7461]">
+                      Deadline: {formatDate(entry.project.Deadline)}
+                    </p>
+                  </div>
+                  <div className="text-right text-sm text-[#665f4b]">
+                    <p>{formatCurrency(entry.spent)} spent</p>
+                    <p>{formatCurrency(Number(entry.project.Budget))} budgeted</p>
+                  </div>
+                </div>
+
+                <div className="h-2.5 w-full rounded-full bg-[#ddd4bb]">
+                  <div
+                    className={`h-2.5 rounded-full transition-all ${
+                      entry.pct >= 100
+                        ? "bg-[#b3473f]"
+                        : entry.pct >= 80
+                        ? "bg-[#b0671f]"
+                        : "bg-[#2f7d50]"
+                    }`}
+                    style={{ width: `${Math.min(entry.pct, 100)}%` }}
+                  />
+                </div>
+
+                <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-xs text-[#746d59]">
+                  <span>{entry.pct.toFixed(1)}% used</span>
+                  <span className={entry.remaining < 0 ? "font-semibold text-[#b3473f]" : ""}>
+                    {entry.remaining < 0
+                      ? `${formatCurrency(Math.abs(entry.remaining))} over budget`
+                      : `${formatCurrency(entry.remaining)} remaining`}
+                  </span>
+                </div>
+              </div>
+            ))}
           </div>
-          <p className="mt-1 text-xs text-[#746d59]">
-            {utilization.toFixed(1)}% of planned budget used.
-          </p>
-        </section>
-      )}
+        )}
+      </section>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <section className="panel stagger-in" style={{ animationDelay: "120ms" }}>

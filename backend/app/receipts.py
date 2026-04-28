@@ -72,51 +72,102 @@ def _parse_date(text: str) -> date:
     return date.today()
 
 
+def _to_float(raw: str) -> Optional[float]:
+    cleaned = raw.strip().replace(",", ".")
+    if not cleaned:
+        return None
+    try:
+        return float(cleaned)
+    except ValueError:
+        return None
+
+
 def _parse_items(text: str) -> list[Dict[str, Any]]:
-    """Extract line items from receipt text.
-    
-    Looks for patterns like:
-    - Item Name    5.99
-    - Description  x2  10.99
-    - Product      qty: 3  price: 15.50
-    """
-    items = []
+    """Extract line items from OCR text using multiple common receipt formats."""
+    items: list[Dict[str, Any]] = []
     lines = text.strip().split("\n")
-    
-    for line in lines:
-        line = line.strip()
-        if not line or len(line) < 3:
+
+    skip_tokens = {
+        "total",
+        "subtotal",
+        "tax",
+        "balance",
+        "change",
+        "cash",
+        "debit",
+        "credit",
+        "visa",
+        "mastercard",
+        "receipt",
+        "thank",
+        "date",
+        "time",
+        "store",
+        "phone",
+        "address",
+    }
+
+    # Handles lines such as:
+    # - ITEM NAME  2 x 1.82
+    # - ITEM NAME  1.82 x 2
+    # - 2 ITEM NAME  3.64
+    # - ITEM NAME ........ 3.64
+    patterns = [
+        re.compile(
+            r"^(?P<name>.+?)\s+(?P<qty>\d+(?:[.,]\d+)?)\s*[xX]\s*\$?(?P<price>\d{1,6}[.,]\d{2})$",
+            re.IGNORECASE,
+        ),
+        re.compile(
+            r"^(?P<name>.+?)\s+\$?(?P<price>\d{1,6}[.,]\d{2})\s*[xX]\s*(?P<qty>\d+(?:[.,]\d+)?)$",
+            re.IGNORECASE,
+        ),
+        re.compile(
+            r"^(?P<qty>\d+(?:[.,]\d+)?)\s+(?P<name>[A-Za-z].+?)\s+\$?(?P<line_total>\d{1,6}[.,]\d{2})$",
+            re.IGNORECASE,
+        ),
+        re.compile(
+            r"^(?P<name>[A-Za-z].+?)\s+\$?(?P<line_total>\d{1,6}[.,]\d{2})$",
+            re.IGNORECASE,
+        ),
+    ]
+
+    for raw_line in lines:
+        line = re.sub(r"\s+", " ", raw_line.strip())
+        if len(line) < 4:
             continue
-            
-        # Skip common non-item lines
-        if any(skip in line.lower() for skip in ["total", "subtotal", "tax", "paid", "thank", "receipt", "date", "time"]):
+
+        lowered = line.lower()
+        if any(token in lowered for token in skip_tokens):
             continue
-        
-        # Pattern 1: "Item Name  $12.99" or "Item Name  12.99  x2"
-        # Look for price patterns at end of line
-        price_match = re.search(r'(?:^|[\s]+)(\d{1,6}[.,]\d{2})(?:\s*$|\s+(?:x|qty|qty:)?[\s]*(\d+(?:[.,]\d+)?)?)', line)
-        
-        if price_match:
-            price_str = price_match.group(1).replace(",", ".")
-            qty_str = price_match.group(2)
-            quantity = 1.0
-            
-            try:
-                price = float(price_str)
-                if qty_str:
-                    quantity = float(qty_str.replace(",", "."))
-                
-                # Extract item name (everything before the price)
-                item_name = line[:price_match.start()].strip()
-                if item_name and len(item_name) > 1:
-                    items.append({
-                        "name": item_name[:255],
-                        "price": price,
-                        "quantity": quantity,
-                    })
-            except ValueError:
+
+        for pattern in patterns:
+            match = pattern.match(line)
+            if not match:
                 continue
-    
+
+            data = match.groupdict()
+            name = (data.get("name") or "").strip(" .-")
+            if len(name) < 2:
+                break
+
+            qty = _to_float(data.get("qty") or "") or 1.0
+            unit_price = _to_float(data.get("price") or "")
+            line_total = _to_float(data.get("line_total") or "")
+
+            if unit_price is None and line_total is not None and qty > 0:
+                unit_price = round(line_total / qty, 2)
+            if unit_price is None:
+                break
+
+            items.append(
+                {
+                    "name": name[:255],
+                    "price": unit_price,
+                    "quantity": qty,
+                }
+            )
+            break
+
     return items
 
 
